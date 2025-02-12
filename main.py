@@ -4,6 +4,11 @@ import chromadb
 from sentence_transformers import   SentenceTransformer
 from chromadb.utils import embedding_functions
 from llama_cpp import Llama
+from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+
+app = FastAPI()
 # Connect to the local database
 client = chromadb.Client()
 
@@ -62,6 +67,27 @@ def generate_response_with_llm (retrieved_texts,query):
     response = llama(prompt,max_tokens=100)
     return response["choices"][0]["text"].strip()
 
+app.mount ("/static",StaticFiles(directory="static"),name="static")
+@app.post("/upload/")
+async def upload_pdf(file: UploadFile = File(...)):
+    # Save the file to a temporary directory
+    file_location = f"files/{file.filename}"
+    with open(file_location, "wb+") as file_object:
+        file_object.write(file.file.read())
+    content = read_file(file_location)
+    store_in_chromadb(collection_name="localRAG_pdfs", texts=chunk_text(content))
+    return {"info" : f"file '{file.filename}' saved at '{file_location}'"}
+
+@app.post("/query/")
+async def query_rag(query: str = Form(...)):
+    retrieved_texts = retrieve_from_chromadb(collection_name="localRAG_pdfs", query=query)
+    response = generate_response_with_llm(retrieved_texts,query)
+    return {"response": response}
+@app.get("/",response_class=HTMLResponse)
+async def read_root():
+    with open("static/index.html") as f:
+        return HTMLResponse(content=f.read(),status_code=200)
+
 def main(pdf_dir):
 
     for filename in os.listdir(pdf_dir):
@@ -80,5 +106,5 @@ def main(pdf_dir):
             print("\nResponse:")
             print(response)
             #print(f"Stored {filename} in the database")
-if __name__ == "__main__":
-    main("data")
+#if __name__ == "__main__":
+#    main("data")
