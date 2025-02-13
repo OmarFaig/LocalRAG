@@ -1,0 +1,10 @@
+body.dark-mode {
+    background-color: #1a202c;
+    color: #a0aec0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
