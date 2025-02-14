@@ -71,7 +71,7 @@ app.mount ("/static",StaticFiles(directory="static"),name="static")
 @app.post("/upload/")
 async def upload_pdf(file: UploadFile = File(...)):
     # Save the file to a temporary directory
-    file_location = f"files/{file.filename}"
+    file_location = f"data/{file.filename}"
     with open(file_location, "wb+") as file_object:
         file_object.write(file.file.read())
     content = read_file(file_location)

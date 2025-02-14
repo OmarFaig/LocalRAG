@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name = "viewport" content = "width = device-width, initial-scale = 1">
-    <link href = "https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="/static/styles.css" rel="stylesheet">
     <title>My App</title>
 </head>
@@ -34,36 +34,39 @@
             </div>
         </div>
     </div>
+
     <script>
-        document.getElementById("upload-form").addEventListener("submit", async (event) => {
-            event.preventDefault();
-            const formData = new FormData();
-            formData.append('file', document.getElementById('file').files[0]);
-            const response = await fetch('/upload/', {
-                method: 'POST',
-                body: formData
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('upload-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData();
+                formData.append('file', document.getElementById('file').files[0]);
+                const response = await fetch('/upload/', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                alert(result.info);
             });
-            const result = await response.json();
-            alert(result.info);
-        });
-        async function sendQuery(){
-            const query = document.getElementById('query').value;
-            const formData = new FormData();
-            formData.append('query', query);
-            const response = await fetch ('/query/' ,{
-                method: 'POST',
-                body: formData  
+
+            async function sendQuery() {
+                const query = document.getElementById('query').value;
+                const formData = new FormData();
+                formData.append('query', query);
+                const response = await fetch('/query/', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML += `<p><strong>You:</strong> ${query}</p>`;
+                chatBox.innerHTML += `<p><strong>RAG:</strong> ${result.response}</p>`;
+                document.getElementById('query').value = '';
+            }
+
+            document.getElementById('toggle-mode').addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
             });
-            const result = await response.json();
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML += `<p><strong>You:</strong> ${query}</p>`;
-            chatBox.innerHTML += `<p><strong>RAG:</strong> ${result.response}</p>`;
-            document.getElementById('query').value = '';
-        }
-        // Toggle mode functionality
-        document.getElementById('toggleMode').addEventListener('click', () => {
-            const body = document.querySelector('body');
-            body.classList.toggle('dark-mode');
         });
     </script>
 </body>
