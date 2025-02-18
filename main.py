@@ -9,6 +9,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+app.mount ("/static",StaticFiles(directory="static"),name="static")
+app.mount ("/data", StaticFiles(directory="data"),name="data")
 # Connect to the local database
 client = chromadb.Client()
 
@@ -67,16 +69,17 @@ def generate_response_with_llm (retrieved_texts,query):
     response = llama(prompt,max_tokens=100)
     return response["choices"][0]["text"].strip()
 
-app.mount ("/static",StaticFiles(directory="static"),name="static")
 @app.post("/upload/")
 async def upload_pdf(file: UploadFile = File(...)):
+    file_urls=[]
+    
     # Save the file to a temporary directory
     file_location = f"data/{file.filename}"
     with open(file_location, "wb+") as file_object:
         file_object.write(file.file.read())
     content = read_file(file_location)
     store_in_chromadb(collection_name="localRAG_pdfs", texts=chunk_text(content))
-    return {"info" : f"file '{file.filename}' saved at '{file_location}'"}
+    return {"info" : f"file '{file.filename}' saved at '{file_location}'","file_url" : f"data/{file.filename}"}
 
 @app.post("/query/")
 async def query_rag(query: str = Form(...)):

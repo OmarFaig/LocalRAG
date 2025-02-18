@@ -46,7 +46,19 @@
                     body: formData
                 });
                 const result = await response.json();
-                alert(result.info);
+               // alert(result.info);
+               if (result.file_urls) {
+                    const pdfViewer = document.getElementById('pdf-viewer');
+                    pdfViewer.innerHTML = '';
+                    result.file_urls.forEach(file => {
+                        const thumbnail = document.createElement('div');
+                        thumbnail.classList.add('mb-2');
+                        thumbnail.innerHTML = `<a href="${file.file_url}" target="_blank">${file.filename}</a>`;
+                        pdfViewer.appendChild(thumbnail);
+                    });
+                } else {
+                    alert(result.error);
+                }
             });
 
             document.getElementById('send-query-button').addEventListener('click', async () => {
